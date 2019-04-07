@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>Calculadora</AssemblyName>
-    <Name>Calculadora</Name>
-    <RootNamespace>Calculadora</RootNamespace>
+    <AssemblyName>RelogioV3</AssemblyName>
+    <Name>RelogioV3</Name>
+    <RootNamespace>RelogioV3</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
