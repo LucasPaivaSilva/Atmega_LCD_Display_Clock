@@ -1,5 +1,7 @@
 #include "def_principais.h"
 #include "LCD.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
 const unsigned char carac0[] PROGMEM = {0b00001, 0b00001, 0b00001, 0b00001, 0b00001, 0b00001, 0b11111};
 const unsigned char carac1[] PROGMEM = {0b11111, 0b10000, 0b10000, 0b10000, 0b10000, 0b10000, 0b10000};
 const unsigned char carac2[] PROGMEM = {0b11111, 0b00001, 0b00001, 0b00001, 0b00001, 0b00001, 0b00001};
@@ -21,6 +23,7 @@ unsigned char Nr_Grande[11] [4] =  {{0x01, 0x02, 0x4C, 0x00}, //nr. 0
 									{0xA5, 0x20, 0xA5, 0x20}};
 unsigned char dot_Grande[2][2] ={{0xA5, 0xA5},
 								 {0x20, 0x2F}};
+volatile unsigned int flag = 0;
 
 void Nr_Grande_Print(char digit, char offset)
 {
@@ -42,6 +45,13 @@ void dot_Grande_Print(char digit, char offset)
 	cmd_LCD(0xC0+offset, 0);
 	cmd_LCD(dot_Grande[intToDisplay][1],1);
 }
+ISR(PCINT1_vect)
+{
+	if (flag == 0)
+	{
+		flag = 1;
+	}
+}
 
 int main()
 {
@@ -49,6 +59,9 @@ int main()
 	DDRB = 0xFF; //PORTB como saída
 	DDRC  = 0x00;
 	PORTC = 0xFF;
+	PCICR = 1<<PCIE1;
+	PCMSK1 = (1<<PCINT8);
+	sei();
 	unsigned char k;
 	unsigned char digitos[3];//variável para os digitos individuais do segundo
 	unsigned char contSegundo = 00;	//variável de contagem para os segundos
@@ -146,14 +159,27 @@ int main()
 			Nr_Grande_Print(digitos[0], 0x0D);
 		}
 		
-		for (x = 0; x<5; x++)
+// 		for (x = 0; x<5; x++)
+// 		{
+// 			if (!tst_bit(PINC, bot1))
+// 			{
+// 				if (displaySwitch == 0){displaySwitch = 1;}
+// 				else{displaySwitch = 0;}
+// 			}
+// 			_delay_ms(199);
+// 		}
+		_delay_ms(1000);
+		if (flag == 1)
 		{
-			if (!tst_bit(PINC, bot1))
+			flag = 0;
+			if (displaySwitch == 1)
 			{
-				if (displaySwitch == 0){displaySwitch = 1;}
-				else{displaySwitch = 0;}
+				displaySwitch = 0;
 			}
-			_delay_ms(199);
+			else
+			{
+				displaySwitch = 1;	
+			}
 		}
 	
 		contSegundo++;
