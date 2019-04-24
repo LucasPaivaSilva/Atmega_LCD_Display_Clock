@@ -24,6 +24,7 @@ unsigned char Nr_Grande[11] [4] =  {{0x01, 0x02, 0x4C, 0x00}, //nr. 0
 unsigned char dot_Grande[2][2] ={{0xA5, 0xA5},
 								 {0x20, 0x2F}};
 volatile unsigned int flag = 0;
+unsigned char contSegundo = 0;	//variável de contagem para os segundos
 
 void Nr_Grande_Print(char digit, char offset)
 {
@@ -52,6 +53,10 @@ ISR(PCINT1_vect)
 		flag = 1;
 	}
 }
+ISR(TIMER1_COMPA_vect) //interrupção do TC1
+{
+	contSegundo = contSegundo + 1;
+}
 
 int main()
 {
@@ -61,12 +66,16 @@ int main()
 	PORTC = 0xFF;
 	PCICR = 1<<PCIE1;
 	PCMSK1 = (1<<PCINT8);
+	TCNT1 = 0;
+	OCR1A = 15624;
+	//TCCR1A = (1<<COM1A0);
+	TCCR1B = (1<<CS10) | (1<<CS12) | (1<<WGM12);//TC1 com prescaler de 1024
+	TIMSK1 = (1<<OCIE1A); //habilita a interrupção do T1
 	sei();
 	unsigned char k;
 	unsigned char digitos[3];//variável para os digitos individuais do segundo
-	unsigned char contSegundo = 00;	//variável de contagem para os segundos
-	unsigned char contMinuto = 12;	//variável de contagem para os minutos
-	unsigned char contHora = 16;	//variável de contagem para as horas
+	unsigned char contMinuto = 0;	//variável de contagem para os minutos
+	unsigned char contHora = 0;	//variável de contagem para as horas
 	unsigned char contDia = 2;		//variável de contagem para os dias
 	unsigned char contMes = 4;		//variável de contagem para os meses
 	unsigned int contAno = 19;	//variável de contagem para os anos
@@ -182,7 +191,6 @@ int main()
 			}
 		}
 	
-		contSegundo++;
 		if (contSegundo == 60){contSegundo = 0;contMinuto++;};
 		if (contMinuto == 60){contMinuto = 0;contHora++;};
 		if (contHora == 24){contHora = 0; contDia++;};
